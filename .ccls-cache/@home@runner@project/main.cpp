@@ -34,7 +34,6 @@ private:
 	float time = 10.00;
 	int option;
 	int playerCount = 0;
-	int enemyCount = 0;
 	Character *playerList[7];
 	//function
 	//function to display all player characters
@@ -141,6 +140,8 @@ private:
 	SafeHouse House;
 	Character *playerList;
 	int numberOfPlayers;
+	int playerCount = 0;
+	Character *enemyList[3];
 	//functions
 	//function to display game name
 	void DisplayGameName()
@@ -154,23 +155,31 @@ private:
 	}
 
 	//function to get random number
-	int Rand(int lowerLimit, int upperLimit)
+	int GetRandomNumber(int lowerLimit, int upperLimit)
 	{
 		int randomNumber = lowerLimit + (rand()%(upperLimit - lowerLimit + 1));
 		return randomNumber;
 	}
 
 	//function to create enemy
-	void CreateEnemy()
+	void CreateEnemy(int numberOfPlayers)
 	{
-		
+		int numberOfEnemy = 3;
+		if(numberOfPlayers<3)
+		{
+			numberOfEnemy = numberOfPlayers;
+		}
+		for(int i=0;i<numberOfEnemy;i++)
+			{
+				
+			}
 	}
 	//function to fight
 	void Fight()
 	{
 		playerList = House.GetCharacterList();
-		
-		CreateEnemy();
+		numberOfPlayers = House.GetNumberOfPlayers();
+		CreateEnemy(numberOfPlayers);  
 		
 	}
 
@@ -191,7 +200,7 @@ private:
 	//function to explore
 	void Explore()
 	{
-		option = Rand(1,2);
+		option = GetRandomNumber(1,2);
 		switch(option)
 		{
 			case 1:
