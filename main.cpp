@@ -33,17 +33,14 @@ private:
 	//variables
 	float time = 10.00;
 	int option;
-	int n = 0;
-	Character *playerList[7] ;
+	int playerCount = 0;
+	int enemyCount = 0;
+	Character *playerList[7];
 	//function
-	int Rand(int lowerLimit, int upperLimit)
-	{
-		int randomNumber = lowerLimit + (rand()%(upperLimit - lowerLimit + 1));
-		return randomNumber;
-	}
+	//function to display all player characters
 	void DisplayAllCharacters()
 	{
-		for(int i=0; i<n; i++)
+		for(int i=0; i<playerCount; i++)
 		{
 			cout<<endl<<endl;
 			cout<<"\nCHARACTER "<<i+1;
@@ -74,50 +71,24 @@ private:
 		}
 	}
 
-	//function to create enemy
-	void CreateEnemy()
-	{
-		
-	}
-	//function to fight
-	void Fight()
-	{
-		CreateEnemy();	
-	}
-
-	//function to explore
-	void Explore()
-	{
-		option = Rand(1,2);
-		switch(option)
-		{
-			case 1:
-			Fight();
-			break;
-			case 2:
-			//Chest();
-			break;
-		}
-	}
-
-	//function to shop
-	void Shop()
-	{
-			
-	}
+	
 public:
+	//getter
+	Character *GetCharacterList()		{		return *playerList;		}
+	int GetNumberOfPlayers()			{		return playerCount;		}
+
 	SafeHouse()
 	{
 		playerList[0] = new Character("LADY WAGON",100,84,52);
-		n=1;
+		playerCount=1;
 	}
-	void Play()
+	int Play()
 	{
 		while (playerList[0] != NULL)
 		{
 			cout<<"\nAVAILABLE CHARACTERS ";
 			DisplayAllCharacters();
-			if(n>3)
+			if(playerCount>3)
 			{
 				cout<<"\nDO YOU WANT TO SWAP CHARCTERS\n1. YES\n2. NO";
 				cout<<"\nENTER YOUR CHOICE : ";
@@ -141,20 +112,23 @@ public:
 			switch(option)
 			{
 				case 1:
-				if(time>=10.00)
-					Explore();
+				if(time>=10.00 && time<20.00)
+					return 1;
 				else
+				{
 					cout<<"\nTIME IS "<<time<<"YOU CANNOT EXPLORE AT THIS TIME";
-				break;
+					return 0;
+				}
 				case 2:
-				Shop();
-				break;
+				return 2;
 				case 3:
-				return;
+				return 3;
 				default:
 				cout<<"\nINVALID OPTION";
+				return 4;
 			}
 		}
+		return 0;
 	}
 };
 
@@ -162,6 +136,11 @@ public:
 class IntoTheWild
 {
 private:
+	//variable
+	int option=0;
+	SafeHouse House;
+	Character *playerList;
+	int numberOfPlayers;
 	//functions
 	//function to display game name
 	void DisplayGameName()
@@ -173,6 +152,56 @@ private:
 	{
 		cout<<"\nYOU ARE IN A NEW WORLD NAMED WAKANDA. YOU NEED TO TAKE OVER THIS WORLD BY CONQUER THE ANIMALS AND ENEMIES IN THE WORLD . YOU CAN EXPLORE THE WORLD BETWEEN 10.00HR TO 20.00 HRS. YOU HAVE A HOUSE IN THIS WORLD INITIALLY YOU HAVE ONE CHARACTER AVAILABLE IN THE HOUSE LATER ON YOU CAN UNLOCK MORE CHARACTERS BY EXPLORE THEM. AFTER EACH MATCH YOU CAN COME BACK AND CHANGE THE CHARACTER. YOU CAN HAVE UPTO 3 CHARATERS AT THE TIME OF EXPLORE EACH CHARACTER HAVE DIFFERENT ABILITIES AND EACH ABILITIES TAKE DIFFERENT TURN CYCLE . YOU CAN HAVE MANY CHARACTERS BUT WHEN YOU GO TO EXPLORE YOU CAN HAVE ONLY FIRST THREE CHARACTER \n\nALL THE BEST";
 	}
+
+	//function to get random number
+	int Rand(int lowerLimit, int upperLimit)
+	{
+		int randomNumber = lowerLimit + (rand()%(upperLimit - lowerLimit + 1));
+		return randomNumber;
+	}
+
+	//function to create enemy
+	void CreateEnemy()
+	{
+		
+	}
+	//function to fight
+	void Fight()
+	{
+		playerList = House.GetCharacterList();
+		
+		CreateEnemy();
+		
+	}
+
+	//function for chest
+	void Chest()
+	{
+		
+	}
+
+	
+
+	//function to shop
+	void Shop()
+	{
+			
+	}
+
+	//function to explore
+	void Explore()
+	{
+		option = Rand(1,2);
+		switch(option)
+		{
+			case 1:
+			Fight();
+			break;
+			case 2:
+			Chest();
+			break;
+		}
+	}
 	
 public:
 	void Game()
@@ -182,8 +211,20 @@ public:
 		//function to display game story
 		DisplayGameStory();
 		//class object safehouse
-		SafeHouse House;
-		House.Play();
+		
+		while(option ==0)
+		{
+			option = House.Play();
+		}
+		switch(option)
+		{	
+			case 1:
+			Explore();
+			break;
+			case 2:
+			Shop();
+			break;
+		}
 		
 	}
 };
