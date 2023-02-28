@@ -26,6 +26,27 @@ public:
 	}
 };
 
+
+//class for player
+class Player : public Character
+{
+public:
+	Player (string _name,int _health, int _damagePoint, int _defence): Character ( _name, _health,  _damagePoint, _defence)
+	{
+		
+	}
+};
+
+//class for enemy
+class Enemy : public Character
+{
+public:
+	Enemy (string _name,int _health, int _damagePoint, int _defence): Character ( _name, _health,  _damagePoint, _defence)
+	{
+		
+	}
+};
+
 //class for safe house
 class SafeHouse
 {
@@ -34,7 +55,10 @@ private:
 	float time = 10.00;
 	int option;
 	int playerCount = 0;
-	Character *playerList[7];
+	Player *playerList[7];
+	int gold=0;
+	int copper=0;
+	int iron = 0;
 	//function
 	//function to display all player characters
 	void DisplayAllCharacters()
@@ -54,7 +78,7 @@ private:
 		{
 			int changeThis;
 			int chanageThat;
-			Character *ptr;
+			Player *ptr;
 			DisplayAllCharacters();
 			cout<<"\nSELECT THE NUMBER OF CHARCTER TO CHANGED : ";
 			cin>>changeThis;
@@ -76,9 +100,23 @@ public:
 	Character *GetCharacterList()		{		return *playerList;		}
 	int GetNumberOfPlayers()			{		return playerCount;		}
 
+	//setter
+	void AddGold(int value)				{		gold += value;		}
+	void AddCopper(int value)			{		copper += value;	}
+	void AddIron(int value)				{		iron += value;		}
+
+	//function to dispaly utilities
+	void DisplayUtilities()
+	{
+		cout<<"\n\nGOLD : "<<gold;
+		cout<<"\nCOPPER : "<<copper;
+		cout<<"\nIRON : "<<iron;
+	}
+
+
 	SafeHouse()
 	{
-		playerList[0] = new Character("LADY WAGON",100,84,52);
+		playerList[0] = new Player("LADY WAGON",100,84,52);
 		playerCount=1;
 	}
 	int Play()
@@ -138,10 +176,13 @@ private:
 	//variable
 	int option=0;
 	SafeHouse House;
-	Character *playerList;
 	int numberOfPlayers;
 	int playerCount = 0;
-	Character *enemyList[3];
+	int numberOfEnemy=0;
+	int numberOfCharacters=0;
+	Character *playerList;
+	Enemy *enemyList[3];
+	Character *allCharacter[6];
 	//functions
 	//function to display game name
 	void DisplayGameName()
@@ -161,32 +202,90 @@ private:
 		return randomNumber;
 	}
 
+	void AllPlayers()
+	{
+		for(int i=0;i<numberOfPlayers;i++)
+		{
+			allCharacter[i] = &playerList[i];
+			numberOfCharacters++;
+		}
+		for(int i=numberOfPlayers;i<numberOfPlayers+numberOfEnemy;i++)
+		{
+			allCharacter[i]	= enemyList[i-numberOfPlayers];
+			numberOfCharacters++;
+		}
+	}
+
+	//function to game round
+	void GameRound()
+	{
+		AllPlayers();
+		for(int i=0;i<numberOfCharacters;i++)
+		{
+			//allCharacter[i]->Attack();	
+		}
+		
+	}
+
 	//function to create enemy
 	void CreateEnemy(int numberOfPlayers)
 	{
-		int numberOfEnemy = 3;
+		numberOfEnemy = 3;
 		if(numberOfPlayers<3)
 		{
 			numberOfEnemy = numberOfPlayers;
 		}
 		for(int i=0;i<numberOfEnemy;i++)
+		{
+			option = GetRandomNumber(1,3);
+			switch(option)
 			{
-				
+				case 1:
+				enemyList[i]= new Enemy ("WOLF",100,30,40);
+				break;
+				case 2:
+				enemyList[i]= new Enemy ("TIGER",150,50,30);
+				break;
+				case 3:
+				enemyList[i]= new Enemy ("ELEPHANT",200,30,60);
+				break;
 			}
+		}
 	}
+	
+	
 	//function to fight
 	void Fight()
 	{
 		playerList = House.GetCharacterList();
 		numberOfPlayers = House.GetNumberOfPlayers();
 		CreateEnemy(numberOfPlayers);  
-		
+		GameRound();
 	}
 
 	//function for chest
 	void Chest()
 	{
-		
+		int numberOfItems = GetRandomNumber(1,3);
+		for(int i=0; i<numberOfItems;i++)
+		{
+			option = GetRandomNumber(1,3);
+			int value = GetRandomNumber(50, 500);
+			switch(option)
+			{
+				case 1:
+				House.AddGold(value);
+				break;
+				case 2:
+				House.AddCopper(value);
+				break;
+				case 3:
+				House.AddIron(value);
+				break;
+			}
+		}
+		House.DisplayUtilities();
+			
 	}
 
 	
@@ -204,9 +303,11 @@ private:
 		switch(option)
 		{
 			case 1:
+			cout<<"\nFIGHT STARTS";
 			Fight();
 			break;
 			case 2:
+			cout<<"\nFOUND A CHEST";	
 			Chest();
 			break;
 		}
