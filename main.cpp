@@ -8,11 +8,13 @@ private:
 string name;
 int damagePoint;
 int defence;
+int maxHealth;
 int health;
 public:
 	Character(string _name,int _health, int _damagePoint, int _defence)
 	{
 		name = _name;
+		maxHealth = _health;
 		health = _health;
 		damagePoint = _damagePoint;
 		defence = _defence;
@@ -24,6 +26,12 @@ public:
 		cout<<"\nDAMAGE POINT : "<<damagePoint;
 		cout<<"\nDEFENCE : "<<defence;
 	}
+
+	//getter
+	int GetDamagePoints()	{		return damagePoint;		}
+
+	//setter
+	void TakeDamage(int damagePoint)		{	health=health-(damagePoint-defence);	}
 };
 
 
@@ -97,13 +105,13 @@ private:
 	
 public:
 	//getter
-	Character *GetCharacterList()		{		return *playerList;		}
+	Player *GetCharacterList()		{		return *playerList;		}
 	int GetNumberOfPlayers()			{		return playerCount;		}
 
 	//setter
-	void AddGold(int value)				{		gold += value;		}
-	void AddCopper(int value)			{		copper += value;	}
-	void AddIron(int value)				{		iron += value;		}
+	void AddGold(int value)				{		gold += value;cout<<"Get "<<gold<<" GOLD FROM CHEST";			}
+	void AddCopper(int value)			{		copper += value;cout<<"Get "<<copper<<" COPPER FROM CHEST";		}
+	void AddIron(int value)				{		iron += value;cout<<"Get "<<iron<<" IRON FROM CHEST";			}
 
 	//function to dispaly utilities
 	void DisplayUtilities()
@@ -180,7 +188,7 @@ private:
 	int playerCount = 0;
 	int numberOfEnemy=0;
 	int numberOfCharacters=0;
-	Character *playerList;
+	Player *playerList;
 	Enemy *enemyList[3];
 	Character *allCharacter[6];
 	//functions
@@ -202,28 +210,57 @@ private:
 		return randomNumber;
 	}
 
-	void AllPlayers()
+	// void AllPlayers()
+	// {
+	// 	for(int i=0;i<numberOfPlayers;i++)
+	// 	{
+	// 		allCharacter[i] = &playerList[i];
+	// 		numberOfCharacters++;
+	// 	}
+	// 	for(int i=numberOfPlayers;i<numberOfPlayers+numberOfEnemy;i++)
+	// 	{
+	// 		allCharacter[i]	= enemyList[i-numberOfPlayers];
+	// 		numberOfCharacters++;
+	// 	}
+	// }
+
+	void DisplayStatus()
 	{
+		cout<<"\n\nPLAYERS";
 		for(int i=0;i<numberOfPlayers;i++)
 		{
-			allCharacter[i] = &playerList[i];
-			numberOfCharacters++;
+			cout<<"/nNUMBER "<<i+1;
+			playerList[i].Display();
 		}
-		for(int i=numberOfPlayers;i<numberOfPlayers+numberOfEnemy;i++)
+		cout<<"\n\nENEMIES";
+		for(int i=0;i<numberOfEnemy;i++)
 		{
-			allCharacter[i]	= enemyList[i-numberOfPlayers];
-			numberOfCharacters++;
+			cout<<"\nNUMBER "<<i+1;
+			enemyList[i]->Display();	
 		}
+	}
+	//function to fight
+	void Fight(Player player, Enemy *enemy)
+	{
+		enemy->TakeDamage(player.GetDamagePoints())	;
 	}
 
 	//function to game round
 	void GameRound()
 	{
-		AllPlayers();
-		for(int i=0;i<numberOfCharacters;i++)
-		{
-			//allCharacter[i]->Attack();	
-		}
+		int playerNumber;
+		int enemyNumber;
+		playerList = House.GetCharacterList();
+		numberOfPlayers = House.GetNumberOfPlayers();
+		CreateEnemy(numberOfPlayers); 
+		DisplayStatus();
+		cout<<"\nPLAYER TURN";
+		cout<<"\nSELECT YOUR PLAYER TO ATTACK : ";
+		cin>>playerNumber;
+		cout<<"\nENTR ENEMY TO ATTACK : ";
+		cin>>enemyNumber;
+		Fight(playerList[playerNumber-1],enemyList[enemyNumber-1]);
+		DisplayStatus();
 		
 	}
 
@@ -237,7 +274,7 @@ private:
 		}
 		for(int i=0;i<numberOfEnemy;i++)
 		{
-			option = GetRandomNumber(1,3);
+			option = GetRandomNumber(1,4);
 			switch(option)
 			{
 				case 1:
@@ -249,19 +286,15 @@ private:
 				case 3:
 				enemyList[i]= new Enemy ("ELEPHANT",200,30,60);
 				break;
+				case 4:
+				enemyList[i]= new Enemy ("LION",175,50,40);
+				break;
 			}
 		}
 	}
 	
 	
-	//function to fight
-	void Fight()
-	{
-		playerList = House.GetCharacterList();
-		numberOfPlayers = House.GetNumberOfPlayers();
-		CreateEnemy(numberOfPlayers);  
-		GameRound();
-	}
+	
 
 	//function for chest
 	void Chest()
@@ -304,7 +337,7 @@ private:
 		{
 			case 1:
 			cout<<"\nFIGHT STARTS";
-			Fight();
+			GameRound();
 			break;
 			case 2:
 			cout<<"\nFOUND A CHEST";	
