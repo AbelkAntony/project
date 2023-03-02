@@ -9,36 +9,39 @@ string name;
 int damagePoint;
 int defence;
 int maxHealth;
-int health;
+int currentHealth;
 public:
 	Character(string _name,int _health, int _damagePoint, int _defence)
 	{
 		name = _name;
 		maxHealth = _health;
-		health = _health;
+		currentHealth = _health;
 		damagePoint = _damagePoint;
 		defence = _defence;
 	}
 	void Display()
 	{
 		cout<<"\nNAME : "<<name;
-		cout<<"\nHEALTH : "<<health;
+		cout<<"\nHEALTH : "<<currentHealth;
 		cout<<"\nDAMAGE POINT : "<<damagePoint;
 		cout<<"\nDEFENCE : "<<defence;
 	}
 
 	//getter
 	int GetDamagePoints()	{		return damagePoint;		}
-
+	int GetHealth()			{		return currentHealth;	}
+	string GetName()		{		return name;			}
 	//setter
 	void TakeDamage(int damagePoint)		
 	{	
 		int damage;
-		if(damagePoint < defence)
+		if(damagePoint-defence<0)
 			damage =0;
+		else if(currentHealth-(damagePoint-defence)<0)
+			damage = currentHealth;
 		else
 			damage =damagePoint-defence;
-		health=health-damage;	
+		currentHealth=currentHealth-damage;	
 		cout<<"\nCAUSE DAMAGE "<<damage;
 	}
 };
@@ -133,7 +136,7 @@ public:
 
 	SafeHouse()
 	{
-		playerList[0] = new Player("LADY WAGON",100,84,52);
+		playerList[0] = new Player("LADY WAGON",100,70,40);
 		playerCount=1;
 	}
 	int Play()
@@ -182,7 +185,6 @@ public:
 				return 4;
 			}
 		}
-		cout<<"return 0";
 		return 0;
 	}
 };
@@ -200,6 +202,7 @@ private:
 	int numberOfCharacters=0;
 	Player *playerList[7];
 	Enemy *enemyList[3];
+	string name;
 	string player = "alive";
 	string enemy = "alive";
 	int round = 1;
@@ -247,9 +250,95 @@ private:
 	{
 		int enemy =  GetRandomNumber(0, numberOfEnemy-1);
 		int player = GetRandomNumber(0, numberOfPlayers-1);
-		cout<<"\n"<<player;
 		playerList[player]->TakeDamage(enemyList[enemy]->GetDamagePoints());
+		if(playerList[player]->GetHealth()<=0)
+			{
+				name = enemyList[player]->GetName();
+				cout<<"\nENEMY "<<name<<" DEAD";
+				DeleteCharacter(player,numberOfPlayers);
+				
+			}
 	}
+
+//function to delete dead player
+	void DeleteCharacter(int playerPosition,int numberOfPlayer)
+	{
+		if(playerPosition==0)
+		{
+			delete playerList[0];
+			numberOfPlayers -=1;
+		}
+		else
+		{
+			for(int i=0; i<numberOfEnemy; i++)
+			{
+				if(playerList[i]==playerList[playerPosition])
+				{
+					delete playerList[i];
+					for(int j=i;j<numberOfPlayers;j++)
+					{
+						playerList[j]=playerList[j+1];
+					}
+					i -=1;
+					numberOfPlayers -=1;
+				}
+			}
+		}
+		if(numberOfPlayers <=0)
+			player ="dead";
+	}
+//function to delete dead enemy
+	void DeleteCharacter(int enemyPosition)
+	{
+		if(enemyPosition==0)
+		{
+			delete enemyList[0];
+			numberOfEnemy -=1;
+		}
+		else
+		{
+			for(int i=0; i<numberOfEnemy; i++)
+			{
+				if(enemyList[i]==enemyList[enemyPosition])
+				{
+					delete enemyList[i];
+					for(int j=i;j<numberOfEnemy;j++)
+					{
+						enemyList[j]=enemyList[j+1];
+					}
+					i -=1;
+					numberOfEnemy -=1;
+				}
+			}
+		}
+		if(numberOfEnemy <=0)
+			enemy ="dead";
+	}
+
+	//function for chest
+	void Chest()
+	{
+		int numberOfItems = GetRandomNumber(1,3);
+		for(int i=0; i<numberOfItems;i++)
+		{
+			option = GetRandomNumber(1,3);
+			int value = GetRandomNumber(5, 25);
+			switch(option)
+			{
+				case 1:
+				House->AddGold(value);
+				break;
+				case 2:
+				House->AddCopper(value);
+				break;
+				case 3:
+				House->AddIron(value);
+				break;
+			}
+		}
+		House->DisplayUtilities();	
+	}
+
 
 	//function to game round
 	void GameRound()
@@ -262,7 +351,7 @@ private:
 			playerList[i] = House->GetCharacterList(i);
 		CreateEnemy(numberOfPlayers); 
 		DisplayStatus();
-		while(player =="alive" && enemy == "alive")
+		while(player =="alive")
 		{
 			cout<<"\nROUND : "<<round;
 			cout<<"\nPLAYER TURN";
@@ -271,12 +360,22 @@ private:
 			cout<<"\nENTR ENEMY TO ATTACK : ";
 			cin>>enemyNumber;
 			Fight(playerList[playerNumber-1],enemyList[enemyNumber-1]);
-			//if(enemyList[enemyNumber-1]->GetHealth<=0)
+			if(enemyList[enemyNumber-1]->GetHealth()<=0)
 			{
-			//	Delete(enemyList[enemyNumber-1]);
+				name = enemyList[enemyNumber-1]->GetName();
+				cout<<"\nENEMY "<<name<<" DEAD";
+				DeleteCharacter(enemyNumber-1);
+				
+			}
+			if(numberOfEnemy==0)
+			{
+				Chest();
+				
+				break;
 			}
 			DisplayStatus();
 			Fight();
+			
 			round++;
 		}
 	}
@@ -313,29 +412,7 @@ private:
 	
 	
 
-	//function for chest
-	void Chest()
-	{
-		int numberOfItems = GetRandomNumber(1,3);
-		for(int i=0; i<numberOfItems;i++)
-		{
-			option = GetRandomNumber(1,3);
-			int value = GetRandomNumber(5, 25);
-			switch(option)
-			{
-				case 1:
-				House->AddGold(value);
-				break;
-				case 2:
-				House->AddCopper(value);
-				break;
-				case 3:
-				House->AddIron(value);
-				break;
-			}
-		}
-		House->DisplayUtilities();	
-	}
+
 
 	
 
