@@ -31,7 +31,12 @@ public:
 	int GetDamagePoints()	{		return damagePoint;		}
 
 	//setter
-	void TakeDamage(int damagePoint)		{	health=health-(damagePoint-defence);	}
+	void TakeDamage(int damagePoint)		
+	{	
+		int damage =damagePoint-defence;
+		health=health-damage;	
+		cout<<"\nCAUSE DAMAGE "<<damage;
+	}
 };
 
 
@@ -105,13 +110,13 @@ private:
 	
 public:
 	//getter
-	Player *GetCharacterList()		{		return *playerList;		}
+	Player *GetCharacterList(int i)		{		return playerList[i];	}
 	int GetNumberOfPlayers()			{		return playerCount;		}
 
 	//setter
-	void AddGold(int value)				{		gold += value;cout<<"Get "<<gold<<" GOLD FROM CHEST";			}
-	void AddCopper(int value)			{		copper += value;cout<<"Get "<<copper<<" COPPER FROM CHEST";		}
-	void AddIron(int value)				{		iron += value;cout<<"Get "<<iron<<" IRON FROM CHEST";			}
+	void AddGold(int value)				{		gold =gold+ value;cout<<"\nGET "<<value<<" GOLD FROM CHEST";			}
+	void AddCopper(int value)			{		copper =copper+ value;cout<<"\nGET "<<value<<" COPPER FROM CHEST";		}
+	void AddIron(int value)				{		iron =iron+ value;cout<<"\nGET "<<value<<" IRON FROM CHEST";			}
 
 	//function to dispaly utilities
 	void DisplayUtilities()
@@ -129,7 +134,7 @@ public:
 	}
 	int Play()
 	{
-		while (playerList[0] != NULL)
+		while (playerCount>0)
 		{
 			cout<<"\nAVAILABLE CHARACTERS ";
 			DisplayAllCharacters();
@@ -173,6 +178,7 @@ public:
 				return 4;
 			}
 		}
+		cout<<"return 0";
 		return 0;
 	}
 };
@@ -183,12 +189,12 @@ class IntoTheWild
 private:
 	//variable
 	int option=0;
-	SafeHouse House;
+	SafeHouse *House = new SafeHouse;
 	int numberOfPlayers;
 	int playerCount = 0;
 	int numberOfEnemy=0;
 	int numberOfCharacters=0;
-	Player *playerList;
+	Player *playerList[7];
 	Enemy *enemyList[3];
 	Character *allCharacter[6];
 	//functions
@@ -210,27 +216,13 @@ private:
 		return randomNumber;
 	}
 
-	// void AllPlayers()
-	// {
-	// 	for(int i=0;i<numberOfPlayers;i++)
-	// 	{
-	// 		allCharacter[i] = &playerList[i];
-	// 		numberOfCharacters++;
-	// 	}
-	// 	for(int i=numberOfPlayers;i<numberOfPlayers+numberOfEnemy;i++)
-	// 	{
-	// 		allCharacter[i]	= enemyList[i-numberOfPlayers];
-	// 		numberOfCharacters++;
-	// 	}
-	// }
-
 	void DisplayStatus()
 	{
 		cout<<"\n\nPLAYERS";
 		for(int i=0;i<numberOfPlayers;i++)
 		{
-			cout<<"/nNUMBER "<<i+1;
-			playerList[i].Display();
+			cout<<"\nNUMBER "<<i+1;
+			playerList[i]->Display();
 		}
 		cout<<"\n\nENEMIES";
 		for(int i=0;i<numberOfEnemy;i++)
@@ -240,9 +232,17 @@ private:
 		}
 	}
 	//function to fight
-	void Fight(Player player, Enemy *enemy)
+	void Fight(Player *player, Enemy *enemy)
 	{
-		enemy->TakeDamage(player.GetDamagePoints())	;
+		enemy->TakeDamage(player->GetDamagePoints())	;
+	}
+	void Fight()
+	{
+		int enemy =  GetRandomNumber(0, numberOfEnemy-1);
+		cout<<"\n"<<enemy;
+		//int player = GetRandomNumber(0, numberOfPlayers-1);
+		//cout<<"\n"<<player;
+		//playerList[player].TakeDamage(enemyList[enemy]->GetDamagePoints());
 	}
 
 	//function to game round
@@ -250,8 +250,9 @@ private:
 	{
 		int playerNumber;
 		int enemyNumber;
-		playerList = House.GetCharacterList();
-		numberOfPlayers = House.GetNumberOfPlayers();
+		numberOfPlayers = House->GetNumberOfPlayers();
+		for(int i=0;i<numberOfPlayers;i++)
+			playerList[i] = House->GetCharacterList(i);
 		CreateEnemy(numberOfPlayers); 
 		DisplayStatus();
 		cout<<"\nPLAYER TURN";
@@ -260,7 +261,12 @@ private:
 		cout<<"\nENTR ENEMY TO ATTACK : ";
 		cin>>enemyNumber;
 		Fight(playerList[playerNumber-1],enemyList[enemyNumber-1]);
+		//if(enemyList[enemyNumber-1]->GetHealth<=0)
+		{
+		//	Delete(enemyList[enemyNumber-1]);
+		}
 		DisplayStatus();
+		Fight();
 		
 	}
 
@@ -307,18 +313,17 @@ private:
 			switch(option)
 			{
 				case 1:
-				House.AddGold(value);
+				House->AddGold(value);
 				break;
 				case 2:
-				House.AddCopper(value);
+				House->AddCopper(value);
 				break;
 				case 3:
-				House.AddIron(value);
+				House->AddIron(value);
 				break;
 			}
 		}
-		House.DisplayUtilities();
-			
+		House->DisplayUtilities();	
 	}
 
 	
@@ -330,9 +335,9 @@ private:
 	}
 
 	//function to explore
-	void Explore()
+	int Explore()
 	{
-		option = GetRandomNumber(1,2);
+		option = GetRandomNumber(2,2);
 		switch(option)
 		{
 			case 1:
@@ -342,6 +347,7 @@ private:
 			case 2:
 			cout<<"\nFOUND A CHEST";	
 			Chest();
+			return 0;
 			break;
 		}
 	}
@@ -355,20 +361,19 @@ public:
 		DisplayGameStory();
 		//class object safehouse
 		
-		while(option ==0)
+		while(option <3)
 		{
-			option = House.Play();
+			option = House->Play();
+			switch(option)
+			{	
+				case 1:
+				option= Explore();
+				break;
+				case 2:
+				Shop();
+				break;
+			}
 		}
-		switch(option)
-		{	
-			case 1:
-			Explore();
-			break;
-			case 2:
-			Shop();
-			break;
-		}
-		
 	}
 };
 
