@@ -33,7 +33,11 @@ public:
 	//setter
 	void TakeDamage(int damagePoint)		
 	{	
-		int damage =damagePoint-defence;
+		int damage;
+		if(damagePoint < defence)
+			damage =0;
+		else
+			damage =damagePoint-defence;
 		health=health-damage;	
 		cout<<"\nCAUSE DAMAGE "<<damage;
 	}
@@ -196,6 +200,9 @@ private:
 	int numberOfCharacters=0;
 	Player *playerList[7];
 	Enemy *enemyList[3];
+	string player = "alive";
+	string enemy = "alive";
+	int round = 1;
 	Character *allCharacter[6];
 	//functions
 	//function to display game name
@@ -239,10 +246,9 @@ private:
 	void Fight()
 	{
 		int enemy =  GetRandomNumber(0, numberOfEnemy-1);
-		cout<<"\n"<<enemy;
-		//int player = GetRandomNumber(0, numberOfPlayers-1);
-		//cout<<"\n"<<player;
-		//playerList[player].TakeDamage(enemyList[enemy]->GetDamagePoints());
+		int player = GetRandomNumber(0, numberOfPlayers-1);
+		cout<<"\n"<<player;
+		playerList[player]->TakeDamage(enemyList[enemy]->GetDamagePoints());
 	}
 
 	//function to game round
@@ -250,24 +256,29 @@ private:
 	{
 		int playerNumber;
 		int enemyNumber;
+		
 		numberOfPlayers = House->GetNumberOfPlayers();
 		for(int i=0;i<numberOfPlayers;i++)
 			playerList[i] = House->GetCharacterList(i);
 		CreateEnemy(numberOfPlayers); 
 		DisplayStatus();
-		cout<<"\nPLAYER TURN";
-		cout<<"\nSELECT YOUR PLAYER TO ATTACK : ";
-		cin>>playerNumber;
-		cout<<"\nENTR ENEMY TO ATTACK : ";
-		cin>>enemyNumber;
-		Fight(playerList[playerNumber-1],enemyList[enemyNumber-1]);
-		//if(enemyList[enemyNumber-1]->GetHealth<=0)
+		while(player =="alive" && enemy == "alive")
 		{
-		//	Delete(enemyList[enemyNumber-1]);
+			cout<<"\nROUND : "<<round;
+			cout<<"\nPLAYER TURN";
+			cout<<"\nSELECT YOUR PLAYER TO ATTACK : ";
+			cin>>playerNumber;
+			cout<<"\nENTR ENEMY TO ATTACK : ";
+			cin>>enemyNumber;
+			Fight(playerList[playerNumber-1],enemyList[enemyNumber-1]);
+			//if(enemyList[enemyNumber-1]->GetHealth<=0)
+			{
+			//	Delete(enemyList[enemyNumber-1]);
+			}
+			DisplayStatus();
+			Fight();
+			round++;
 		}
-		DisplayStatus();
-		Fight();
-		
 	}
 
 	//function to create enemy
@@ -309,7 +320,7 @@ private:
 		for(int i=0; i<numberOfItems;i++)
 		{
 			option = GetRandomNumber(1,3);
-			int value = GetRandomNumber(50, 500);
+			int value = GetRandomNumber(5, 25);
 			switch(option)
 			{
 				case 1:
@@ -337,19 +348,19 @@ private:
 	//function to explore
 	int Explore()
 	{
-		option = GetRandomNumber(2,2);
+		option = GetRandomNumber(1,1);
 		switch(option)
 		{
 			case 1:
 			cout<<"\nFIGHT STARTS";
 			GameRound();
-			break;
+			return 0;
 			case 2:
 			cout<<"\nFOUND A CHEST";	
 			Chest();
 			return 0;
-			break;
 		}
+		return 0;
 	}
 	
 public:
