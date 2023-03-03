@@ -45,7 +45,8 @@ public:
 		cout<<"\nCAUSE DAMAGE "<<damage;
 	}
 	void SetDamagePoint()	{		damagePoint = damagePoint+(damagePoint*.2);		}
-	
+	void SetMaxHealth()		{		maxHealth 	= maxHealth+(maxHealth*.2);			}
+	void SetDefence()		{		defence 	= defence + (defence*.2);			}
 };
 
 
@@ -70,6 +71,12 @@ public:
 	{	
 		weaponUpgrade = weaponUpgrade+(weaponUpgrade * .2);	
 		SetDamagePoint();
+	}
+
+	void UpgradeCharacter()
+	{
+		SetMaxHealth();
+		SetDefence();
 	}
 };
 
@@ -530,14 +537,35 @@ private:
 		switch(option)
 		{
 			case 1:
-			playerList[character-1]->UpgradeCharacter();
+			{
+				if(playerList[character-1]->GetCharacterValue()>=House->GetGold())
+				{
+					playerList[character-1]->UpgradeCharacter();
+					House->SetGold(playerList[character-1]->GetCharacterValue());
+				}
+				else
+				{
+					cout<<"\nYOU DO NOT HAVE ENOUGH GOLD";
+				}
+				break;
+			}	
 			break;
 			case 2:
-			playerList[character-1]->SetWeaponUpgrade()
+			{
+				if(playerList[charcter-1]->GetWeaponValue()>=House->GetIron())
+				{
+					playerList[character-1]->UpgradeWeapon();
+					House->SetIron(playerList[character-1]->GetWeaponValue())
+				}
+				else
+				{
+					coutr<<"\nYOU DO NOT HAVE ENOUGH IRON";
+				}
+				break;
+			}
 			
 		}
-		value = playerList[option]->GetWeaponUpgrade();
-		if()
+		
 		
 	}
 
