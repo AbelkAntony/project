@@ -45,6 +45,7 @@ public:
 		cout<<"\nCAUSE DAMAGE "<<damage;
 	}
 	void SetDamagePoint()	{		damagePoint = damagePoint+(damagePoint*.2);		}
+	
 };
 
 
@@ -65,7 +66,11 @@ public:
 	int GetWeaponUpgrade()			{		return weaponUpgrade;	}
 
 	//setter
-	void SetWeaponUpgrade()			{		weaponUpgrade = weaponUpgrade+(weaponUpgrade * .2);	}
+	void UpgradeWeapon()			
+	{	
+		weaponUpgrade = weaponUpgrade+(weaponUpgrade * .2);	
+		SetDamagePoint();
+	}
 };
 
 //class for enemy
@@ -344,7 +349,7 @@ private:
 		DisplayStatus();
 	}
 
-//function to delete dead player
+	//function to delete dead player
 	void DeleteCharacter(int playerPosition,int numberOfPlayer)
 	{
 		if(playerPosition==0)
@@ -373,7 +378,7 @@ private:
 			player ="dead";
 		}
 	}
-//function to delete dead enemy
+	//function to delete dead enemy
 	void DeleteCharacter(int enemyPosition)
 	{
 		if(enemyPosition==0)
@@ -512,9 +517,27 @@ private:
 	//function to shop
 	void Shop()
 	{
+		int character;
+		House->DisplayUtilities();
+		int value;
 		DisplayPlayer();
-		cout<<"\nSELECT PLAYER : ";
+		cout<<"\nSELECT CHARACTER : ";
+		cin>>character;
+		cout<<"\nDO YOU WANT TO UPGRADE ";
+		cout<<"\n1. CHARACTER";
+		cout<<"\n2. WEAPON";
 		cin>>option;
+		switch(option)
+		{
+			case 1:
+			playerList[character-1]->UpgradeCharacter();
+			break;
+			case 2:
+			playerList[character-1]->SetWeaponUpgrade()
+			
+		}
+		value = playerList[option]->GetWeaponUpgrade();
+		if()
 		
 	}
 
