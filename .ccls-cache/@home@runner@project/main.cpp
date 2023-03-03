@@ -44,17 +44,28 @@ public:
 		currentHealth=currentHealth-damage;	
 		cout<<"\nCAUSE DAMAGE "<<damage;
 	}
+	void SetDamagePoint()	{		damagePoint = damagePoint+(damagePoint*.2);		}
 };
 
 
 //class for player
 class Player : public Character
 {
+private:
+string weapon;
+int weaponUpgrade;
 public:
-	Player (string _name,int _health, int _damagePoint, int _defence): Character ( _name, _health,  _damagePoint, _defence)
+	Player (string _name,int _health, int _damagePoint, int _defence,string _weapon,int _weaponUpgrade): Character ( _name, _health,  _damagePoint, _defence)
 	{
-		
+		weapon = _weapon;
+		weaponUpgrade = _weaponUpgrade;
 	}
+
+	//getter
+	int GetWeaponUpgrade()			{		return weaponUpgrade;	}
+
+	//setter
+	void SetWeaponUpgrade()			{		weaponUpgrade = weaponUpgrade+(weaponUpgrade * .2);	}
 };
 
 //class for enemy
@@ -76,6 +87,7 @@ private:
 	int option;
 	int playerCount = 0;
 	Player *playerList[7];
+	Player *ptr;
 	int gold=0;
 	int copper=0;
 	int iron = 0;
@@ -114,30 +126,82 @@ private:
 		}
 	}
 
+	int GetRandomNumber(int lowerLimit, int upperLimit)
+	{
+		int randomNumber = lowerLimit + (rand()%(upperLimit - lowerLimit + 1));
+		return randomNumber;
+	}
 	
 public:
 	//getter
 	Player *GetCharacterList(int i)		{		return playerList[i];	}
 	int GetNumberOfPlayers()			{		return playerCount;		}
+	
 
 	//setter
 	void AddGold(int value)				{		gold =gold+ value;cout<<"\nGET "<<value<<" GOLD FROM CHEST";			}
-	void AddCopper(int value)			{		copper =copper+ value;cout<<"\nGET "<<value<<" COPPER FROM CHEST";		}
+	//void AddCopper(int value)			{		copper =copper+ value;cout<<"\nGET "<<value<<" COPPER FROM CHEST";		}
 	void AddIron(int value)				{		iron =iron+ value;cout<<"\nGET "<<value<<" IRON FROM CHEST";			}
 
 	//function to dispaly utilities
 	void DisplayUtilities()
 	{
 		cout<<"\n\nGOLD : "<<gold;
-		cout<<"\nCOPPER : "<<copper;
+		//cout<<"\nCOPPER : "<<copper;
 		cout<<"\nIRON : "<<iron;
+	}
+
+	//function to get random player
+	void GetRandomPlayer()
+	{
+		bool playerFound = false;
+		while(GetNumberOfPlayers()<7)
+		{
+			option = GetRandomNumber(1,7);
+			switch(option)
+			{
+				case 1:
+				ptr = new Player ("LADY WAGON",100,84,52,"ARROW AND BOW",50);
+				break;
+				case 2:
+				ptr = new Player ("ROBERT",100,48,61,"BATON",60);
+				break;
+				case 3:
+				ptr = new Player ("STELLA",100,67,54,"TASER",30);
+				break;
+				case 4:
+				ptr = new Player ("ALBERT",100,65,38,"LASER GUN",70);
+				break;
+				case 5:
+				ptr = new Player ("WIZARD",100,65,38,"FIRE GUN",40);
+				break;
+				case 6:
+				ptr = new Player ("PABLO",100,58,47,"MACHETES",55);
+				break;
+				case 7:
+				ptr = new Player ("JAMES",100,54,43,"HAMMER",35);
+				break;
+			}
+			for(int i=0;i<playerCount;i++)
+			{
+				if(playerList[i]==ptr)
+				{
+					playerFound = true;
+				}
+			}
+			if(playerFound == false)
+			{
+				playerList[playerCount] = ptr;
+				playerCount++;
+				break;
+			}
+		}
 	}
 
 
 	SafeHouse()
 	{
-		playerList[0] = new Player("LADY WAGON",100,70,40);
-		playerCount=1;
+		GetRandomPlayer();
 	}
 	int Play()
 	{
@@ -226,7 +290,14 @@ private:
 		return randomNumber;
 	}
 
-	void DisplayStatus()
+	//fuction defenition of Plawer win
+	void PlayerWin()
+	{
+		Chest();
+		House->GetRandomPlayer();
+	}	
+
+	void DisplayPlayer()
 	{
 		cout<<"\n\nPLAYERS";
 		for(int i=0;i<numberOfPlayers;i++)
@@ -234,12 +305,23 @@ private:
 			cout<<"\nNUMBER "<<i+1;
 			playerList[i]->Display();
 		}
+	}
+
+	void DisplaEnemies()
+	{
 		cout<<"\n\nENEMIES";
 		for(int i=0;i<numberOfEnemy;i++)
 		{
 			cout<<"\nNUMBER "<<i+1;
 			enemyList[i]->Display();	
-		}
+		}	
+	}
+
+	//funtion to display status of player and enemy
+	void DisplayStatus()
+	{
+		DisplayPlayer();
+		DisplaEnemies();
 	}
 	//function to fight
 	void Fight(Player *player, Enemy *enemy)
@@ -250,6 +332,7 @@ private:
 	{
 		int enemy =  GetRandomNumber(0, numberOfEnemy-1);
 		int player = GetRandomNumber(0, numberOfPlayers-1);
+		cout<<"\n"<<enemyList[enemy]->GetName()<<" ATTACKED "<<playerList[player]->GetName();
 		playerList[player]->TakeDamage(enemyList[enemy]->GetDamagePoints());
 		if(playerList[player]->GetHealth()<=0)
 			{
@@ -258,6 +341,7 @@ private:
 				DeleteCharacter(player,numberOfPlayers);
 				
 			}
+		DisplayStatus();
 	}
 
 //function to delete dead player
@@ -285,7 +369,9 @@ private:
 			}
 		}
 		if(numberOfPlayers <=0)
+		{
 			player ="dead";
+		}
 	}
 //function to delete dead enemy
 	void DeleteCharacter(int enemyPosition)
@@ -301,6 +387,7 @@ private:
 			{
 				if(enemyList[i]==enemyList[enemyPosition])
 				{
+					cout<<"\n deleting enemy";
 					delete enemyList[i];
 					for(int j=i;j<numberOfEnemy;j++)
 					{
@@ -312,7 +399,9 @@ private:
 			}
 		}
 		if(numberOfEnemy <=0)
+		{
 			enemy ="dead";
+		}
 	}
 
 	//function for chest
@@ -321,7 +410,7 @@ private:
 		int numberOfItems = GetRandomNumber(1,3);
 		for(int i=0; i<numberOfItems;i++)
 		{
-			option = GetRandomNumber(1,3);
+			option = GetRandomNumber(1,2);
 			int value = GetRandomNumber(5, 25);
 			switch(option)
 			{
@@ -329,11 +418,11 @@ private:
 				House->AddGold(value);
 				break;
 				case 2:
-				House->AddCopper(value);
-				break;
-				case 3:
 				House->AddIron(value);
 				break;
+				//case 3:
+				//House->AddCopper(value);
+				//break;
 			}
 		}
 		House->DisplayUtilities();	
@@ -351,9 +440,10 @@ private:
 			playerList[i] = House->GetCharacterList(i);
 		CreateEnemy(numberOfPlayers); 
 		DisplayStatus();
-		while(player =="alive")
+		round = 0;
+		while(player =="alive" && enemy == "alive")
 		{
-			cout<<"\nROUND : "<<round;
+			cout<<"\n\nROUND : "<<round;
 			cout<<"\nPLAYER TURN";
 			cout<<"\nSELECT YOUR PLAYER TO ATTACK : ";
 			cin>>playerNumber;
@@ -369,13 +459,16 @@ private:
 			}
 			if(numberOfEnemy==0)
 			{
-				Chest();
-				
+				PlayerWin();
 				break;
 			}
 			DisplayStatus();
 			Fight();
-			
+			if(numberOfPlayers == 0)
+			{
+				cout<<"\nYOU LOSS";
+				break;
+			}
 			round++;
 		}
 	}
@@ -384,7 +477,7 @@ private:
 	void CreateEnemy(int numberOfPlayers)
 	{
 		numberOfEnemy = 3;
-		if(numberOfPlayers<3)
+		if(numberOfPlayers<3)  
 		{
 			numberOfEnemy = numberOfPlayers;
 		}
@@ -419,7 +512,10 @@ private:
 	//function to shop
 	void Shop()
 	{
-			
+		DisplayPlayer();
+		cout<<"\nSELECT PLAYER : ";
+		cin>>option;
+		
 	}
 
 	//function to explore
