@@ -10,14 +10,16 @@ int damagePoint;
 int defence;
 int maxHealth;
 int currentHealth;
+bool alive;
 public:
-	Character(string _name,int _health, int _damagePoint, int _defence)
+	Character(string _name,int _health, int _damagePoint, int _defence, bool _alive)
 	{
 		name = _name;
 		maxHealth = _health;
 		currentHealth = _health;
 		damagePoint = _damagePoint;
 		defence = _defence;
+		alive = _alive;
 	}
 	void Display()
 	{
@@ -31,7 +33,9 @@ public:
 	int GetDamagePoints()	{		return damagePoint;		}
 	int GetHealth()			{		return currentHealth;	}
 	string GetName()		{		return name;			}
+	bool GetStatus()		{		return alive;			}
 	//setter
+
 	void TakeDamage(int damagePoint)		
 	{	
 		int damage;
@@ -44,9 +48,10 @@ public:
 		currentHealth=currentHealth-damage;	
 		cout<<"\nCAUSE DAMAGE "<<damage;
 	}
-	void SetDamagePoint()	{		damagePoint = damagePoint+(damagePoint*.2);		}
-	void SetMaxHealth()		{		maxHealth 	= maxHealth+(maxHealth*.2);			}
-	void SetDefence()		{		defence 	= defence + (defence*.2);			}
+	void SetStatus(bool status)		{		alive 		= status;							}
+	void SetDamagePoint()			{		damagePoint = damagePoint+(damagePoint*.2);		}
+	void SetMaxHealth()				{		maxHealth 	= maxHealth+(maxHealth*.2);			}
+	void SetDefence()				{		defence 	= defence + (defence*.2);			}
 };
 
 
@@ -55,21 +60,22 @@ class Player : public Character
 {
 private:
 string weapon;
-int weaponUpgrade;
+int weaponUpgradeValue;
+int characterUpgradeValue;
 public:
-	Player (string _name,int _health, int _damagePoint, int _defence,string _weapon,int _weaponUpgrade): Character ( _name, _health,  _damagePoint, _defence)
+	Player (string _name,int _health, int _damagePoint, int _defence,string _weapon,int _weaponUpgradeValue, bool _alive): Character ( _name, _health,  _damagePoint, _defence, _alive)
 	{
 		weapon = _weapon;
-		weaponUpgrade = _weaponUpgrade;
+		weaponUpgradeValue = _weaponUpgradeValue;
 	}
 
 	//getter
-	int GetWeaponUpgrade()			{		return weaponUpgrade;	}
-
+	int GetWeaponUpgrade()			{		return weaponUpgradeValue;	}
+	int GetWeaponValue()			{		return weaponUpgradeValue;	}
 	//setter
 	void UpgradeWeapon()			
 	{	
-		weaponUpgrade = weaponUpgrade+(weaponUpgrade * .2);	
+		weaponUpgradeValue = weaponUpgradeValue+(weaponUpgradeValue * .2);	
 		SetDamagePoint();
 	}
 
@@ -84,7 +90,7 @@ public:
 class Enemy : public Character
 {
 public:
-	Enemy (string _name,int _health, int _damagePoint, int _defence): Character ( _name, _health,  _damagePoint, _defence)
+	Enemy (string _name,int _health, int _damagePoint, int _defence, bool _alive): Character ( _name, _health,  _damagePoint, _defence, _alive)
 	{
 		
 	}
@@ -173,25 +179,25 @@ public:
 			switch(option)
 			{
 				case 1:
-				ptr = new Player ("LADY WAGON",100,84,52,"ARROW AND BOW",50);
+				ptr = new Player ("LADY WAGON",100,84,52,"ARROW AND BOW",50,true);
 				break;
 				case 2:
-				ptr = new Player ("ROBERT",100,48,61,"BATON",60);
+				ptr = new Player ("ROBERT",100,48,61,"BATON",60,true);
 				break;
 				case 3:
-				ptr = new Player ("STELLA",100,67,54,"TASER",30);
+				ptr = new Player ("STELLA",100,67,54,"TASER",30,true);
 				break;
 				case 4:
-				ptr = new Player ("ALBERT",100,65,38,"LASER GUN",70);
+				ptr = new Player ("ALBERT",100,65,38,"LASER GUN",70,true);
 				break;
 				case 5:
-				ptr = new Player ("WIZARD",100,65,38,"FIRE GUN",40);
+				ptr = new Player ("WIZARD",100,65,38,"FIRE GUN",40,true);
 				break;
 				case 6:
-				ptr = new Player ("PABLO",100,58,47,"MACHETES",55);
+				ptr = new Player ("PABLO",100,58,47,"MACHETES",55,true);
 				break;
 				case 7:
-				ptr = new Player ("JAMES",100,54,43,"HAMMER",35);
+				ptr = new Player ("JAMES",100,54,43,"HAMMER",35,true);
 				break;
 			}
 			for(int i=0;i<playerCount;i++)
@@ -336,85 +342,97 @@ private:
 		DisplaEnemies();
 	}
 	//function to fight
-	void Fight(Player *player, Enemy *enemy)
+	void Fight(Player *player, Enemy *enemy,int enemyNumber)
 	{
-		enemy->TakeDamage(player->GetDamagePoints())	;
+		enemy->TakeDamage(player->GetDamagePoints());
+		if(enemyList[enemyNumber-1]->GetHealth()<=0)
+			{
+				name = enemyList[enemyNumber-1]->GetName();
+				cout<<"\nENEMY "<<name<<" DEAD";
+				enemyList[enemyNumber-1]->SetStatus(false);
+				numberOfEnemy--;
+			}
 	}
 	void Fight()
 	{
 		int enemy =  GetRandomNumber(0, numberOfEnemy-1);
 		int player = GetRandomNumber(0, numberOfPlayers-1);
+		while(playerList[player]->GetStatus()==false)
+		{
+			int player = GetRandomNumber(0, numberOfPlayers-1);
+		}
 		cout<<"\n"<<enemyList[enemy]->GetName()<<" ATTACKED "<<playerList[player]->GetName();
 		playerList[player]->TakeDamage(enemyList[enemy]->GetDamagePoints());
 		if(playerList[player]->GetHealth()<=0)
 			{
-				name = enemyList[player]->GetName();
-				cout<<"\nENEMY "<<name<<" DEAD";
-				DeleteCharacter(player,numberOfPlayers);
-				
+				name = playerList[player]->GetName();
+				cout<<"\nPLAYER "<<name<<" DEAD";
+				//DeleteCharacter(player,numberOfPlayers);
+				playerList[player]->SetStatus(false);
+				numberOfPlayers--;
 			}
 		DisplayStatus();
 	}
 
-	//function to delete dead player
-	void DeleteCharacter(int playerPosition,int numberOfPlayer)
-	{
-		if(playerPosition==0)
-		{
-			delete playerList[0];
-			numberOfPlayers -=1;
-		}
-		else
-		{
-			for(int i=0; i<numberOfEnemy; i++)
-			{
-				if(playerList[i]==playerList[playerPosition])
-				{
-					delete playerList[i];
-					for(int j=i;j<numberOfPlayers;j++)
-					{
-						playerList[j]=playerList[j+1];
-					}
-					i -=1;
-					numberOfPlayers -=1;
-				}
-			}
-		}
-		if(numberOfPlayers <=0)
-		{
-			player ="dead";
-		}
-	}
+	// //function to delete dead player
+	// void DeleteCharacter(int playerPosition,int numberOfPlayer)
+	// {
+	// 	if(playerPosition==0)
+	// 	{
+	// 		delete playerList[0];
+	// 		numberOfPlayers -=1;
+	// 	}
+	// 	else
+	// 	{
+	// 		for(int i=0; i<numberOfEnemy; i++)
+	// 		{
+	// 			if(playerList[i]==playerList[playerPosition])
+	// 			{
+	// 				delete playerList[i];
+	// 				for(int j=i;j<numberOfPlayers;j++)
+	// 				{
+	// 					playerList[j]=playerList[j+1];
+	// 				}
+	// 				i -=1;
+	// 				numberOfPlayers -=1;
+	// 			}
+	// 		}
+	// 	}
+	// 	if(numberOfPlayers <=0)
+	// 	{
+	// 		player ="dead";
+	// 	}
+	// }
 	//function to delete dead enemy
-	void DeleteCharacter(int enemyPosition)
-	{
-		if(enemyPosition==0)
-		{
-			delete enemyList[0];
-			numberOfEnemy -=1;
-		}
-		else
-		{
-			for(int i=0; i<numberOfEnemy; i++)
-			{
-				if(enemyList[i]==enemyList[enemyPosition])
-				{
-					cout<<"\n deleting enemy";
-					delete enemyList[i];
-					for(int j=i;j<numberOfEnemy;j++)
-					{
-						enemyList[j]=enemyList[j+1];
-					}
-					i -=1;
-					numberOfEnemy -=1;
-				}
-			}
-		}
-		if(numberOfEnemy <=0)
-		{
-			enemy ="dead";
-		}
-	}
+	// void DeleteCharacter(int enemyPosition)
+	// {
+	// 	if(enemyPosition==0)
+	// 	{
+	// 		delete enemyList[0];
+	// 		numberOfEnemy -=1;
+	// 	}
+	// 	else
+	// 	{
+	// 		for(int i=0; i<numberOfEnemy; i++)
+	// 		{
+	// 			if(enemyList[i]==enemyList[enemyPosition])
+	// 			{
+	// 				cout<<"\n deleting enemy";
+	// 				delete enemyList[i];
+	// 				for(int j=i;j<numberOfEnemy;j++)
+	// 				{
+	// 					enemyList[j]=enemyList[j+1];
+	// 				}
+	// 				i -=1;
+	// 				numberOfEnemy -=1;
+	// 			}
+	// 		}
+	// 	}
+	// 	if(numberOfEnemy <=0)
+	// 	{
+	// 		enemy ="dead";
+	// 	}
+	// }
 
 	//function for chest
 	void Chest()
@@ -457,23 +475,26 @@ private:
 		{
 			cout<<"\n\nROUND : "<<round;
 			cout<<"\nPLAYER TURN";
-			cout<<"\nSELECT YOUR PLAYER TO ATTACK : ";
-			cin>>playerNumber;
-			cout<<"\nENTR ENEMY TO ATTACK : ";
-			cin>>enemyNumber;
-			Fight(playerList[playerNumber-1],enemyList[enemyNumber-1]);
-			if(enemyList[enemyNumber-1]->GetHealth()<=0)
+			do
 			{
-				name = enemyList[enemyNumber-1]->GetName();
-				cout<<"\nENEMY "<<name<<" DEAD";
-				DeleteCharacter(enemyNumber-1);
-				
-			}
-			if(numberOfEnemy==0)
-			{
-				PlayerWin();
-				break;
-			}
+				cout<<"\nSELECT YOUR PLAYER TO ATTACK : ";
+				cin>>playerNumber;
+				cout<<"\nENTR ENEMY TO ATTACK : ";
+				cin>>enemyNumber;
+				if(enemyList[enemyNumber-1]->GetStatus())
+				{
+					Fight(playerList[playerNumber-1],enemyList[enemyNumber-1],enemyNumber);
+				}
+				else
+				{
+					cout<<"\nENEMY ALREADY DEAD";
+				}
+				if(numberOfEnemy==0)
+				{
+					PlayerWin();
+					break;
+				}
+			}while(enemyList[enemyNumber-1]->GetStatus()==false);	
 			DisplayStatus();
 			Fight();
 			if(numberOfPlayers == 0)
@@ -499,16 +520,16 @@ private:
 			switch(option)
 			{
 				case 1:
-				enemyList[i]= new Enemy ("WOLF",100,30,40);
+				enemyList[i]= new Enemy ("WOLF",100,30,40,true);
 				break;
 				case 2:
-				enemyList[i]= new Enemy ("TIGER",150,50,30);
+				enemyList[i]= new Enemy ("TIGER",150,50,30,true);
 				break;
 				case 3:
-				enemyList[i]= new Enemy ("ELEPHANT",200,30,60);
+				enemyList[i]= new Enemy ("ELEPHANT",200,30,60,true);
 				break;
 				case 4:
-				enemyList[i]= new Enemy ("LION",175,50,40);
+				enemyList[i]= new Enemy ("LION",175,50,40,true);
 				break;
 			}
 		}
@@ -555,11 +576,11 @@ private:
 				if(playerList[charcter-1]->GetWeaponValue()>=House->GetIron())
 				{
 					playerList[character-1]->UpgradeWeapon();
-					House->SetIron(playerList[character-1]->GetWeaponValue())
+					House->SetIron(playerList[character-1]->GetWeaponValue());
 				}
 				else
 				{
-					coutr<<"\nYOU DO NOT HAVE ENOUGH IRON";
+					cout<<"\nYOU DO NOT HAVE ENOUGH IRON";
 				}
 				break;
 			}
