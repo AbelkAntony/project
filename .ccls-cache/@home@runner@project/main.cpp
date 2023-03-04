@@ -70,8 +70,9 @@ public:
 	}
 
 	//getter
-	int GetWeaponUpgrade()			{		return weaponUpgradeValue;	}
-	int GetWeaponValue()			{		return weaponUpgradeValue;	}
+	int GetWeaponUpgrade()			{		return weaponUpgradeValue;		}
+	int GetWeaponValue()			{		return weaponUpgradeValue;		}
+	int GetCharacterValue()			{		return characterUpgradeValue;	}
 	//setter
 	void UpgradeWeapon()			
 	{	
@@ -109,6 +110,7 @@ private:
 	int gold=0;
 	int copper=0;
 	int iron = 0;
+	int stage=0;
 	//function
 	//function to display all player characters
 	void DisplayAllCharacters()
@@ -154,12 +156,23 @@ public:
 	//getter
 	Player *GetCharacterList(int i)		{		return playerList[i];	}
 	int GetNumberOfPlayers()			{		return playerCount;		}
-	
-
+	int GetGold()						{		return gold;			}
+	int GetIron()						{		return iron;			}
+	int GetNumberOfEnemy()				
+	{
+		if(stage <3)
+		{
+			return stage;
+		}
+		else
+			return 3;
+	}
 	//setter
 	void AddGold(int value)				{		gold =gold+ value;cout<<"\nGET "<<value<<" GOLD FROM CHEST";			}
 	//void AddCopper(int value)			{		copper =copper+ value;cout<<"\nGET "<<value<<" COPPER FROM CHEST";		}
 	void AddIron(int value)				{		iron =iron+ value;cout<<"\nGET "<<value<<" IRON FROM CHEST";			}
+	void SetGold(int value)				{		gold -= value;															}
+	void SetIron(int value)				{		iron -= value;															}
 
 	//function to dispaly utilities
 	void DisplayUtilities()
@@ -221,6 +234,7 @@ public:
 	{
 		GetRandomPlayer();
 	}
+
 	int Play()
 	{
 		while (playerCount>0)
@@ -252,7 +266,10 @@ public:
 			{
 				case 1:
 				if(time>=10.00 && time<20.00)
+				{
+					stage +=1;
 					return 1;
+				}
 				else
 				{
 					cout<<"\nTIME IS "<<time<<"YOU CANNOT EXPLORE AT THIS TIME";
@@ -278,7 +295,7 @@ private:
 	//variable
 	int option=0;
 	SafeHouse *House = new SafeHouse;
-	int numberOfPlayers;
+	int numberOfPlayers = House->GetNumberOfPlayers();
 	int playerCount = 0;
 	int numberOfEnemy=0;
 	int numberOfCharacters=0;
@@ -287,7 +304,7 @@ private:
 	string name;
 	string player = "alive";
 	string enemy = "alive";
-	int round = 1;
+	int round ;
 	Character *allCharacter[6];
 	//functions
 	//function to display game name
@@ -470,17 +487,32 @@ private:
 			playerList[i] = House->GetCharacterList(i);
 		CreateEnemy(numberOfPlayers); 
 		DisplayStatus();
-		round = 0;
+		round = 1;
 		while(player =="alive" && enemy == "alive")
 		{
 			cout<<"\n\nROUND : "<<round;
 			cout<<"\nPLAYER TURN";
 			do
 			{
-				cout<<"\nSELECT YOUR PLAYER TO ATTACK : ";
-				cin>>playerNumber;
-				cout<<"\nENTR ENEMY TO ATTACK : ";
-				cin>>enemyNumber;
+				do
+				{
+				
+					cout<<"\nSELECT YOUR PLAYER TO ATTACK : ";
+					cin>>playerNumber;
+					if(playerNumber>numberOfPlayers)
+					{
+						cout<<"\nINVALID CHOICE";
+					}
+				}while(playerNumber>numberOfPlayers);
+				do
+				{
+					cout<<"\nENTR ENEMY TO ATTACK : ";
+					cin>>enemyNumber;
+					if(enemyNumber>numberOfEnemy)
+					{
+						cout<<"\nINVALID CHOICE";
+					}
+				}while(enemyNumber>numberOfEnemy);
 				if(enemyList[enemyNumber-1]->GetStatus())
 				{
 					Fight(playerList[playerNumber-1],enemyList[enemyNumber-1],enemyNumber);
@@ -491,6 +523,10 @@ private:
 				}
 				if(numberOfEnemy==0)
 				{
+					for(int i=0;i<House->GetNumberOfEnemy();i++)
+					{					
+						delete enemyList[i];
+					}
 					PlayerWin();
 					break;
 				}
@@ -573,7 +609,7 @@ private:
 			break;
 			case 2:
 			{
-				if(playerList[charcter-1]->GetWeaponValue()>=House->GetIron())
+				if(playerList[character-1]->GetWeaponValue()>=House->GetIron())
 				{
 					playerList[character-1]->UpgradeWeapon();
 					House->SetIron(playerList[character-1]->GetWeaponValue());
